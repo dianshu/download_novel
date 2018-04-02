@@ -1,4 +1,4 @@
-脚本从 'http://www.80txt.com/' 网站下载小说。可以自定义三个参数。
+脚本从 http://www.80txt.com/ 网站下载小说。可以自定义三个参数。
 
   category_url： 小说目录url
 
