@@ -5,6 +5,7 @@ import multiprocessing
 import logging
 from params import *
 
+
 def get_sections(headers, category_url):
     """
     根据category_url获取每个章节的title和对应的url
@@ -23,8 +24,13 @@ def get_sections(headers, category_url):
     sections_url = []
     soup = BeautifulSoup(r.text, 'lxml')
     sections = soup.find_all(attrs={'rel': 'nofollow'})
+
+    start = False
     for section in sections:
-        sections_url.append({'title': section.string.strip(), 'url': section.attrs['href']})
+        if start_chapter in section.string.strip():
+            start = True
+        if start:
+            sections_url.append({'title': section.string.strip(), 'url': section.attrs['href']})
     return sections_url
 
 
@@ -48,7 +54,8 @@ def save_content_to_txt(sections, fileID, headers):
             except:
                 logging.warning(section['title'] + ' failed')
                 continue
-            title = section['title']
+            title = section['title'].strip()
+            
             soup = BeautifulSoup(r.text, 'lxml')
             # 处理章节内容
             content = []
@@ -79,7 +86,7 @@ def main(category_url, headers, process_num):
     """
     logging.basicConfig(format='%(asctime)s %(processName)s: %(message)s', datefmt='%H:%M:%S', level=logging.INFO)
     logging.info('acquire categories...')
-    sections = get_sections(headers, catagory_url)[1452:]
+    sections = get_sections(headers, catagory_url)
     logging.info('success')
     processes = [0] * process_num
     step = int(len(sections) / process_num) + 1
