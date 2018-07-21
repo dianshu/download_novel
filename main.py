@@ -23,7 +23,7 @@ def get_sections(headers, category_url):
     # 解析章节列表
     sections_url = []
     soup = BeautifulSoup(r.text, 'lxml')
-    sections = soup.find_all(attrs={'rel': 'nofollow'})
+    sections = soup.select('li a')
 
     start = False
     for section in sections:
