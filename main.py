@@ -1,4 +1,5 @@
 import requests
+from requests.compat import urljoin
 from bs4 import BeautifulSoup
 from bs4.element import Tag, NavigableString
 import multiprocessing
@@ -22,15 +23,15 @@ def get_sections(headers, category_url):
         print(r.status_code)
     # 解析章节列表
     sections_url = []
-    soup = BeautifulSoup(r.text, 'lxml')
-    sections = soup.select('li a')
+    soup = BeautifulSoup(r.text, 'html5lib')
+    sections = soup.select(section_css_selector)
 
     start = False
     for section in sections:
         if start_chapter in section.string.strip():
             start = True
         if start:
-            sections_url.append({'title': section.string.strip(), 'url': section.attrs['href']})
+            sections_url.append({'title': section.string.strip(), 'url': urljoin(host, section.attrs['href'])})
     return sections_url
 
 
@@ -55,11 +56,10 @@ def save_content_to_txt(sections, fileID, headers):
                 logging.warning(section['title'] + ' failed')
                 continue
             title = section['title'].strip()
-            
-            soup = BeautifulSoup(r.text, 'lxml')
+            soup = BeautifulSoup(r.text, 'html5lib')
             # 处理章节内容
             content = []
-            for c in soup.find(attrs={'id': 'content'}).contents:
+            for c in soup.select(content_div_css_selector)[0].contents:
                 if isinstance(c, NavigableString):
                     content.append(str(c).strip())
                 if isinstance(c, Tag) and c.name == 'br':
